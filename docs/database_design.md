@@ -152,3 +152,4 @@ Schema Count: 14 Domain & User Tables + 1 Supporting Audit Table
 - `new_values`: `JSON`
 - `changed_at`: `TIMESTAMP DEFAULT CURRENT_TIMESTAMP`
 - `changed_by`: `VARCHAR(50) DEFAULT 'SYSTEM'`
+

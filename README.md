@@ -1,206 +1,112 @@
-# AIR-FLOW
+# AIR-FLOW: Advanced SQL-Based Airline Revenue and Seat Utilization Intelligence System
 
-**Advanced SQL-Based Airline Revenue and Seat Utilization Intelligence System**
-
-> Course: 21CSE742P — Advanced SQL and Modern Database Features  
-> Student: Lakshya, Final-Year B.Tech CSE
-
----
-
-## Overview
-
-AIR-FLOW is a database-driven analytics platform that transforms airline operational data (flights, seat inventory, bookings, payments, refunds, fares, cancellations) into actionable revenue and seat-utilization insights.
-
-**The central contribution is Advanced SQL.** The web application is a thin interface over SQL logic — all core analytics are computed inside the database using views, CTEs, window functions, stored procedures, and triggers. Python and React only call and display results.
-
-### Problem Statement
-
-Airline operational data is spread across many tables. Naive joins double-count payments and refunds, and counting blocked seats as capacity distorts occupancy metrics. AIR-FLOW solves this with a carefully designed schema and SQL analytics that compute these metrics correctly inside the database.
+**Course**: 21CSE742P, Advanced SQL and Modern Database Features  
+**Author**: Lakshya (Final-Year B.Tech CSE)  
+**Academic Viva & Demo Project**
 
 ---
 
-## Tech Stack
+## 1. Executive Summary
 
-| Layer | Technology |
-|-------|-----------|
-| Database | MySQL 8.0+ (MySQL Workbench for inspection) |
-| Backend | Python 3.10+, FastAPI, SQLAlchemy, PyMySQL, Pydantic, python-jose (JWT), passlib/bcrypt |
-| Frontend | React + Vite, JavaScript, React Router, Axios, Recharts, Lucide React, Tailwind CSS |
-| Tools | VS Code, Git, Postman |
+AIR-FLOW is a database-driven business intelligence and operational analytics platform designed to solve multi-table operational data challenges in the airline industry. Naive SQL joins often double-count payments and refunds when joined with multi-seat reservations, and counting blocked seats as active capacity distorts flight occupancy. 
+
+AIR-FLOW resolves these challenges through an advanced SQL database engine featuring pre-aggregated CTEs, window functions (`LAG`, `ROW_NUMBER`, `RANK`, running `SUM OVER`), stored procedures with row-level locking (`SELECT ... FOR UPDATE`), state-machine triggers, and stored generated columns enforcing partial uniqueness. The FastAPI backend and React frontend serve as a thin, performant presentation layer over the database logic.
 
 ---
 
-## Database Design
+## 2. Fixed Tech Stack
 
-**14 core tables** (+ `audit_log` supporting table if triggers require it):
-
-1. `airlines` — Airline companies
-2. `airports` — Airport locations
-3. `aircraft` — Fleet (linked to airlines)
-4. `aircraft_seats` — Permanent seat layout per aircraft
-5. `routes` — Origin-destination pairs with distance
-6. `flights` — Scheduled flights with status tracking
-7. `flight_seats` — Per-flight seat inventory (initialized from aircraft layout)
-8. `passengers` — Passenger directory
-9. `bookings` — Booking records with status workflow
-10. `booking_seats` — Seat assignments per booking (HELD → CONFIRMED or CANCELLED)
-11. `payments` — Payment and refund transactions
-12. `fares` — Fare schedules by flight, class, and validity period
-13. `cancellations` — Cancellation records with refund amounts
-14. `users` — Authentication (ADMIN and ANALYST roles)
-
-### Key Metrics (computed in SQL, never in application code)
-
-- **Gross Revenue** = SUM(payments WHERE type=PAYMENT AND status=SUCCESS)
-- **Refunds** = SUM(payments WHERE type=REFUND AND status=SUCCESS)
-- **Net Revenue** = Gross Revenue − Refunds
-- **Seat Occupancy %** = Confirmed seats / (Total flight seats − Blocked seats) × 100
-- **Cancellation Rate** = Cancelled bookings / Total bookings × 100
+- **Database**: MySQL 8.0+ Community Server (InnoDB Storage Engine, `utf8mb4_unicode_ci`)
+- **Backend**: Python 3.10+, FastAPI, SQLAlchemy, PyMySQL, Pydantic, python-jose (JWT), bcrypt
+- **Frontend**: React 18, Vite, Tailwind CSS, Recharts, Lucide React, Axios, React Router v6
+- **Architecture**: Decoupled Client-Server over MySQL Stored Routines & Views
 
 ---
 
-## Project Structure
+## 3. Demo Credentials
 
-```
-AIR-FLOW/
-├── frontend/               # React + Vite application
-│   ├── public/
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── layouts/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── hooks/
-│   │   ├── context/
-│   │   └── utils/
-│   ├── package.json
-│   └── .env.example
-├── backend/                # FastAPI application
-│   ├── app/
-│   │   ├── api/
-│   │   ├── core/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   ├── repositories/
-│   │   ├── analytics/
-│   │   ├── database/
-│   │   └── utils/
-│   ├── main.py
-│   ├── requirements.txt
-│   └── .env.example
-├── database/               # All SQL files
-│   ├── schema.sql
-│   ├── indexes.sql
-│   ├── views.sql
-│   ├── procedures.sql
-│   ├── triggers.sql
-│   ├── analytics_queries.sql
-│   └── explain_comparisons.sql
-├── scripts/                # Data generation and initialization
-│   ├── generate_dataset.py
-│   └── initialize_database.py
-├── docs/                   # Documentation
-│   ├── architecture.md
-│   ├── database_design.md
-│   ├── api_documentation.md
-│   ├── testing.md
-│   └── sql_concepts_map.md
-├── README.md
-└── .gitignore
-```
+| Role | Username | Password | Capabilities |
+|---|---|---|---|
+| **ADMIN** | `admin` | `admin123` | Full access: schedule flights, update statuses, manage fares, create bookings, view all BI analytics |
+| **ANALYST** | `analyst` | `analyst123` | Read-only BI intelligence: view dashboards, inspect SQL logic, run fare simulations, export CSV reports |
+
+*(Passwords are stored as 12-round bcrypt hashes in the `users` table).*
 
 ---
 
-## Setup Instructions
+## 4. Key Advanced SQL Features & Viva Talking Points
+
+1. **Anti-Double-Counting Architecture**:
+   - In `vw_flight_revenue` and `procedures.sql`, payments and refunds are pre-aggregated in dedicated CTEs by `booking_id` *before* joining to flights.
+   - **Financial Reconciliation Proof**: Raw table sum of `payments` (₹3,80,53,523.30 net) equals `vw_flight_revenue` sum equals `vw_monthly_revenue` sum to the exact paisa (0.00 discrepancy).
+2. **Double-Booking Prevention with Partial Uniqueness**:
+   - `booking_seats` has a stored generated column `active_seat_lock` that equals `flight_seat_id` if status is `HELD` or `CONFIRMED`, else `NULL`.
+   - Combined with `UNIQUE (flight_seat_id, active_seat_lock)`, multiple `CANCELLED` records are preserved as audit history while conflicting active bookings are immediately rejected (`ERROR 1062`).
+3. **Transactional Concurrency with Row Locking**:
+   - `sp_process_booking` executes `SELECT ... FOR UPDATE` on `flight_seats` to lock requested seats across simultaneous competing threads.
+4. **Window Functions**:
+   - Month-Over-Month revenue growth using `LAG(net_revenue) OVER (ORDER BY revenue_month)` in `vw_monthly_revenue`.
+   - Running cumulative revenue using `SUM(net_revenue) OVER (ORDER BY revenue_month)`.
+   - Moving average using `AVG(net_revenue) OVER (... ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)`.
+   - Top 5 and Bottom 5 revenue flights using `ROW_NUMBER() OVER (...)`.
+5. **JSON Functions**:
+   - Booking channel, baggage tiers, and meal preferences extracted from `booking_metadata` using `->>`, `JSON_EXTRACT`, and `JSON_CONTAINS`.
+6. **Self-Joins**:
+   - Bidirectional route corridor pairs identified via `routes r1 INNER JOIN routes r2 ON r1.origin = r2.destination AND r1.destination = r2.origin`.
+7. **"SQL Behind This" Interface**:
+   - Every chart, table, and KPI on the frontend features a dedicated "SQL Behind This" button that displays the exact query and view powering the visualization.
+
+---
+
+## 5. Quick Setup & Run Instructions
 
 ### Prerequisites
-
-- MySQL 8.0+ (running)
+- MySQL 8.0+ running on `localhost:3306`
 - Python 3.10+
-- Node.js 18+
-- Git
+- Node.js 18+ and npm
 
-### 1. Clone and configure
-
+### 1. Database Initialization
 ```bash
-git clone <repository-url>
-cd AIR-FLOW
-```
-
-### 2. Database setup
-
-```bash
-# Copy and edit the backend .env with your MySQL credentials
-cp backend/.env.example backend/.env
-# Edit backend/.env with your MySQL root password
-
-# Initialize the database (creates air_flow_db, runs schema, loads data)
+# Verify credentials in backend/.env (DB_PASSWORD=...)
 cd scripts
 python initialize_database.py
 ```
+*This drops `air_flow_db`, builds 14 tables + audit log, compiles views/triggers/procedures, seeds 85,000+ flight inventory seats, and verifies financial reconciliation.*
 
-### 3. Backend setup
-
+### 2. Launch FastAPI Backend
 ```bash
 cd backend
-pip install -r requirements.txt
-python main.py
-# API runs at http://localhost:8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+# API Documentation available at http://127.0.0.1:8000/docs
 ```
 
-### 4. Frontend setup
-
+### 3. Launch React Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
-# App runs at http://localhost:5173
+# Web application live at http://localhost:5173
 ```
 
 ---
 
-## Demo Credentials
+## 6. Automated Test Suites
 
-| Role | Username | Password |
-|------|----------|----------|
-| Admin | `admin` | `admin123` |
-| Analyst | `analyst` | `analyst123` |
+```bash
+# 1. Run Core Backend API & View Integration Tests
+python scripts/test_backend.py
 
-> Passwords are stored as bcrypt hashes in the `users` table. These are demo credentials only.
-
----
-
-## Advanced SQL Concepts Demonstrated
-
-| Concept | Where to Find |
-|---------|--------------|
-| CTEs | `analytics_queries.sql`, `views.sql` |
-| Window Functions | `analytics_queries.sql` (ROW_NUMBER, RANK, LAG, running SUM) |
-| Views | `views.sql` (5 analytics views) |
-| Stored Procedures | `procedures.sql` (seat inventory, reports, cancellation) |
-| Triggers | `triggers.sql` (seat consistency, audit log) |
-| JSON Functions | `analytics_queries.sql` (booking_metadata analysis) |
-| Subqueries | `analytics_queries.sql` |
-| Self Joins | `analytics_queries.sql` (reverse route pairs) |
-| EXPLAIN Analysis | `explain_comparisons.sql` (before/after index comparison) |
-| Transactions + Locking | `procedures.sql` (SELECT ... FOR UPDATE) |
-
-See [`docs/sql_concepts_map.md`](docs/sql_concepts_map.md) for a complete mapping of every SQL concept to its location.
+# 2. Run Section 13 Mandatory Edge Cases & Thread Concurrency Test
+python scripts/test_edge_cases.py
+```
 
 ---
 
-## Known Limitations
+## 7. Documentation Index
 
-- Payment processing is simulated (demo mode) — no real payment gateway.
-- Fare scenario analysis uses rule-based simulation with user-entered assumptions, not ML prediction.
-- No real-time airline API integration.
-- Held seats expire after 15 minutes via MySQL EVENT (requires `event_scheduler=ON`).
-
----
-
-## License
-
-Academic project — not for commercial use.
-
+- [`docs/sql_concepts_map.md`](docs/sql_concepts_map.md): Syllabus-to-query map for faculty viva.
+- [`docs/database_design.md`](docs/database_design.md): 14-table schema data dictionary and relationships.
+- [`docs/testing.md`](docs/testing.md): Edge cases and empirical test logs.
+- [`docs/architecture.md`](docs/architecture.md): Architectural diagram and data pipeline.
+- [`docs/api_documentation.md`](docs/api_documentation.md): REST endpoints specification.
+- [`database/explain_comparisons.sql`](database/explain_comparisons.sql): Before/after index optimization with written interpretation.

@@ -56,3 +56,4 @@ In `vw_flight_revenue`, `vw_route_performance`, and `procedures.sql`:
 2. Seat assignments are aggregated in a separate CTE (`seat_counts` / `confirmed_seats`) grouped by `flight_id`.
 3. The flight layer performs a single `LEFT JOIN` on the pre-aggregated results.
 4. **Verification**: Direct sum of raw `payments` table equals `vw_flight_revenue` sum equals `vw_monthly_revenue` sum to the exact paisa (INR 38,053,523.30 net revenue).
+
