@@ -29,3 +29,4 @@ python-dotenv==1.0.0
 
 # Data generation (used by scripts/)
 faker==20.1.0
+

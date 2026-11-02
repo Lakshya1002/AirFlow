@@ -203,3 +203,4 @@ See [`docs/sql_concepts_map.md`](docs/sql_concepts_map.md) for a complete mappin
 ## License
 
 Academic project — not for commercial use.
+
