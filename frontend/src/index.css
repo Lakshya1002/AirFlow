@@ -1,0 +1,10 @@
+/* AIR-FLOW Global Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base body styling */
+body {
+  @apply bg-background text-text-primary antialiased;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
