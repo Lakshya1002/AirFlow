@@ -57,3 +57,4 @@ Authentication: HTTP Bearer JWT Header (`Authorization: Bearer <TOKEN>`)
 | `GET` | `/reports/route-performance` | `vw_route_performance` | `route_performance_report.csv` |
 | `GET` | `/reports/seat-utilization` | `vw_seat_occupancy` | `seat_utilization_report.csv` |
 | `GET` | `/reports/cancellations` | `cancellations` | `cancellations_report.csv` |
+

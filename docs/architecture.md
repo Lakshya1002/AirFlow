@@ -56,3 +56,4 @@
 
 3. **Anti-Double-Counting Data Pipeline**:
    Joining `payments` directly with multi-seat `booking_seats` multiplies monetary aggregates by the number of seats. AIR-FLOW's views pre-aggregate payments in isolated CTEs by `booking_id` before joining flight or route tables.
+

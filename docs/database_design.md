@@ -6,24 +6,137 @@ Schema Count: 14 Domain & User Tables + 1 Supporting Audit Table
 
 ---
 
-## Entity Relationship Overview
+## Entity Relationship Diagram (Mermaid ERD)
 
-```
-[airlines] 1 ──── N [aircraft] 1 ──── N [aircraft_seats]
-   │                      │                     │
-   │                      ▼                     ▼
-   │ 1 ─────────────── N [flights] 1 ──── N [flight_seats] (inventory)
-   │                      │                     │
-   ▼                      ▼                     ▼
-[airports] 1 ──── N [routes] 1 ── N [bookings] 1 ── N [booking_seats] (active lock)
-                                       │    │
-                                       │    ▼
-                                       │  [payments] (PAYMENT / REFUND)
-                                       ▼
-                                  [cancellations]
+```mermaid
+erDiagram
+    airlines ||--o{ aircraft : owns
+    airlines ||--o{ flights : operates
+    aircraft ||--o{ aircraft_seats : contains
+    aircraft ||--o{ flights : assigned_to
+    airports ||--o{ routes : origin
+    airports ||--o{ routes : destination
+    routes ||--o{ flights : defined_by
+    flights ||--o{ flight_seats : inventory
+    flights ||--o{ fares : priced_by
+    flights ||--o{ bookings : carries
+    aircraft_seats ||--o{ flight_seats : instantiated_as
+    flight_seats ||--o{ booking_seats : allocated_to
+    passengers ||--o{ bookings : places
+    bookings ||--o{ booking_seats : includes
+    bookings ||--o{ payments : charged_via
+    bookings ||--o| cancellations : cancelled_by
 
-[users] (admin & analyst authentication)
-[audit_log] (trigger event tracking)
+    airlines {
+        int airline_id PK
+        string airline_name
+        string airline_code UK
+        string country
+    }
+    airports {
+        int airport_id PK
+        string airport_code UK
+        string airport_name
+        string city
+        string country
+    }
+    aircraft {
+        int aircraft_id PK
+        int airline_id FK
+        string registration_number UK
+        string model
+        int total_capacity
+    }
+    aircraft_seats {
+        int aircraft_seat_id PK
+        int aircraft_id FK
+        string seat_number
+        string seat_class
+    }
+    routes {
+        int route_id PK
+        int origin_airport_id FK
+        int destination_airport_id FK
+        decimal distance_km
+    }
+    flights {
+        bigint flight_id PK
+        int airline_id FK
+        int aircraft_id FK
+        int route_id FK
+        string flight_number
+        datetime departure_time
+        datetime arrival_time
+        string flight_status
+    }
+    flight_seats {
+        bigint flight_seat_id PK
+        bigint flight_id FK
+        int aircraft_seat_id FK
+        string seat_status
+    }
+    passengers {
+        int passenger_id PK
+        string full_name
+        string email UK
+        string phone
+    }
+    bookings {
+        bigint booking_id PK
+        string booking_reference UK
+        int passenger_id FK
+        bigint flight_id FK
+        datetime booking_date
+        string booking_status
+        decimal total_amount
+        json booking_metadata
+    }
+    booking_seats {
+        bigint booking_seat_id PK
+        bigint booking_id FK
+        bigint flight_seat_id FK
+        string seat_status
+        bigint active_seat_lock UK
+    }
+    payments {
+        bigint payment_id PK
+        bigint booking_id FK
+        decimal amount
+        string payment_method
+        string payment_type
+        string payment_status
+        string transaction_reference UK
+    }
+    fares {
+        bigint fare_id PK
+        bigint flight_id FK
+        string fare_class
+        decimal base_fare
+        date valid_from
+        date valid_until
+    }
+    cancellations {
+        bigint cancellation_id PK
+        bigint booking_id FK,UK
+        datetime cancellation_date
+        string cancellation_reason
+        decimal refund_amount
+    }
+    users {
+        int user_id PK
+        string username UK
+        string email UK
+        string password_hash
+        string role
+    }
+    audit_log {
+        bigint log_id PK
+        string table_name
+        bigint record_id
+        string action
+        json old_values
+        json new_values
+    }
 ```
 
 ---

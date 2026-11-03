@@ -73,3 +73,4 @@ SELECT 'vw_monthly_revenue_sum', SUM(gross_revenue), SUM(total_refunds), SUM(net
 - `vw_flight_revenue`: `₹4,20,55,053.00 gross - ₹40,01,529.70 refunds = ₹3,80,53,523.30 net`
 - `vw_monthly_revenue`: `₹4,20,55,053.00 gross - ₹40,01,529.70 refunds = ₹3,80,53,523.30 net`
 - **Discrepancy: ₹0.00**.
+
