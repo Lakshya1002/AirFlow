@@ -130,3 +130,4 @@ Have these files open in VS Code to show faculty:
    - Point out the academic disclaimer clarifying that this is a rule-based microeconomic simulation.
 6. **Reports**:
    - Navigate to `/reports` and click **"Download CSV Export"** on any report to show on-the-fly streaming of MySQL view data.
+

@@ -50,3 +50,4 @@ def register_user(
     db.commit()
     db.refresh(new_user)
     return new_user
+

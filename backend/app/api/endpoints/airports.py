@@ -66,3 +66,4 @@ def delete_airport(
     db.delete(airport)
     db.commit()
     return {"message": "Airport deleted successfully"}
+

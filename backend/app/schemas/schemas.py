@@ -252,3 +252,4 @@ class FareScenarioResponse(BaseModel):
     estimated_revenue: Decimal
     revenue_difference: Decimal
     disclaimer: str = "Simulation based strictly on user-entered elasticity assumptions. Not a predictive ML forecast."
+

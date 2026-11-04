@@ -60,3 +60,4 @@ export default function SqlViewer({ title = "SQL Query Logic", sqlQuery, onClose
     </div>
   );
 }
+

@@ -58,3 +58,4 @@ def delete_airline(
     db.delete(airline)
     db.commit()
     return {"message": "Airline deleted successfully"}
+

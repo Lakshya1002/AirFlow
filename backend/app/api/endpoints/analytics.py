@@ -431,3 +431,4 @@ def simulate_fare_scenario(
         "revenue_difference": diff,
         "disclaimer": "Rule-based economic elasticity model based on user-entered elasticity parameter. Not an autonomous prediction."
     }
+

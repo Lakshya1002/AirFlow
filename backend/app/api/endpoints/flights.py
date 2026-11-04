@@ -202,3 +202,4 @@ def get_flight_fares(
     user = Depends(require_analyst)
 ):
     return db.query(Fare).filter(Fare.flight_id == flight_id).all()
+

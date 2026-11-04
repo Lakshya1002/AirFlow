@@ -28,3 +28,4 @@ def get_cancellation(
     if not c:
         raise HTTPException(status_code=404, detail="Cancellation not found")
     return c
+

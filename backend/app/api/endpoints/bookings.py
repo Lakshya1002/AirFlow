@@ -124,3 +124,4 @@ def cancel_booking(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+

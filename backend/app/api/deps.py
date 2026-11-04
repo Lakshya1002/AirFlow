@@ -45,3 +45,4 @@ def require_analyst(current_user: User = Depends(get_current_user)) -> User:
             detail="Insufficient permissions"
         )
     return current_user
+

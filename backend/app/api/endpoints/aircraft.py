@@ -95,3 +95,4 @@ def delete_aircraft(
     db.delete(aircraft)
     db.commit()
     return {"message": "Aircraft and seat layout deleted"}
+

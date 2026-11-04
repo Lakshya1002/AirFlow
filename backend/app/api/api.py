@@ -19,3 +19,4 @@ api_router.include_router(fares.router)
 api_router.include_router(cancellations.router)
 api_router.include_router(analytics.router)
 api_router.include_router(reports.router)
+

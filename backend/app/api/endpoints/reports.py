@@ -70,3 +70,4 @@ def export_cancellations(db: Session = Depends(get_db), user = Depends(require_a
     """)
     rows = db.execute(sql).mappings().all()
     return generate_csv_response(rows, "cancellations_report.csv")
+

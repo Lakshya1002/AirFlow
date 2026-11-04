@@ -77,3 +77,4 @@ def delete_route(
     db.delete(route)
     db.commit()
     return {"message": "Route deleted successfully"}
+

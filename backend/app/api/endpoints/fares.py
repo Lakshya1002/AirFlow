@@ -94,3 +94,4 @@ def update_fare(
     db.commit()
     db.refresh(fare)
     return fare
+

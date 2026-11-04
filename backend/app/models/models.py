@@ -192,3 +192,4 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     role = Column(Enum("ADMIN", "ANALYST"), nullable=False, default="ANALYST")
     created_at = Column(DateTime, server_default=func.now())
+
